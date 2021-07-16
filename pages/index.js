@@ -32,15 +32,32 @@ function ProfileSidebar(properties) {
   );
 }
 
+function ProfileRelationsBox(properties) {
+  return (
+    <ProfileRelationsBoxWrapper>
+      <h2 className="smallTitle">
+        {properties.title} ({properties.items.length})
+      </h2>
+
+      <ul>
+        {/*followers.map((item) => {
+          return(
+            <li key={item}>
+              <a href={`https://github.com/${item}.png`}>
+                <img src={item.image} />
+                <span>{item.title}</span>
+              </a>
+            </li>
+          )
+        })*/}
+      </ul>
+    </ProfileRelationsBoxWrapper>
+  );
+}
+
 export default function Home() {
   const user = "LarisseLima";
-  const [communities, setcommunities] = React.useState([
-    {
-      id: "1",
-      title: "EU AMO MATHEUZÃO",
-      image: "https://avatars.githubusercontent.com/u/21980644?v=4",
-    },
-  ]);
+  const [communities, setcommunities] = React.useState([]);
 
   const friends = [
     "matheusnascgomes",
@@ -51,9 +68,40 @@ export default function Home() {
     "juunegreiros",
   ];
 
+  const [followers, setfollowers] = React.useState([]);
+
+  React.useEffect(() => {
+    fetch(`https://api.github.com/users/LarisseLima/followers`)
+      .then((serverResponse) => serverResponse.json())
+      .then((finalResponse) => setfollowers(finalResponse));
+    fetch("https://graphql.datocms.com/", {
+      method: "POST",
+      headers: {
+        Authorization: "9444ac3475cdcb99742e71445903ce",
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        query: `query {
+          allCommunities {
+            id
+            title
+            imageUrl
+            creatorSlug
+          }
+        }`,
+      }),
+    })
+      .then((resp) => resp.json())
+      .then((finalResponse) => {
+        const datoCommunities = finalResponse.data.allCommunities;
+        setComunidades(datoCommunities);
+      });
+  }, []);
+
   return (
     <>
-      <AlurakutMenu />
+      <AlurakutMenu githubUser={githubUser} />
       <MainGrid>
         <div className="profileArea" style={{ gridArea: "profileArea" }}>
           <ProfileSidebar githubUser={user} />
@@ -61,27 +109,36 @@ export default function Home() {
         <div className="welcomeArea" style={{ gridArea: "welcomeArea" }}>
           <Box>
             <h1 className="title">Bem vindo(a)</h1>
-
             <OrkutNostalgicIconSet />
           </Box>
-
           <Box>
             <h2 className="subTitle">O que você deseja fazer?</h2>
             <form
               onSubmit={function handleNewcommunities(e) {
                 e.preventDefault();
-                const dadosDoForm = new FormData(e.target);
-
-                console.log("Campo: ", dadosDoForm.get("title"));
-                console.log("Campo: ", dadosDoForm.get("image"));
+                const dataForm = new FormData(e.target);
+                console.log("Campo: ", dataForm.get("title"));
+                console.log("Campo: ", dataForm.get("image"));
 
                 const communities = {
-                  id: new Date().toISOString(),
-                  title: dadosDoForm.get("title"),
-                  image: dadosDoForm.get("image"),
+                  title: dataForm.get("title"),
+                  imageUrl: dataForm.get("image"),
+                  creatorSlug: githubUser,
                 };
-                const communitiesUpdate = [...communities, communities];
-                setcommunities(communitiesUpdate);
+
+                fetch("/api/communities", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(communities),
+                }).then(async (res) => {
+                  const dados = await res.json();
+                  console.log(data.recordCreated);
+                  const communities = data.recordCreated;
+                  const communitiesUpdate = [...communities, communities];
+                  setcommunities(communitiesUpdate);
+                });
               }}
             >
               <div>
