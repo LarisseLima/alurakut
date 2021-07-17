@@ -1,4 +1,6 @@
 import React from "react";
+import nookies from "nookies";
+import jwt from "jsonwebtoken";
 import MainGrid from "../src/components/MainGrid";
 import Box from "../src/components/Box";
 import {
@@ -8,21 +10,18 @@ import {
 } from "../src/lib/AlurakutCommons";
 import { ProfileRelationsBoxWrapper } from "../src/components/ProfileRelations";
 
-function ProfileSidebar(properties) {
+function ProfileSidebar(props) {
   return (
     <Box as="aside">
       <img
-        src={`https://github.com/${properties.githubUser}.png`}
+        src={`https://github.com/${props.githubUser}.png`}
         style={{ borderRadius: "8px" }}
       />
       <hr />
 
       <p>
-        <a
-          className="boxLink"
-          href={`https://github.com/${properties.githubUser}`}
-        >
-          @{properties.githubUser}
+        <a className="boxLink" href={`https://github.com/${props.githubUser}`}>
+          @{props.githubUser}
         </a>
       </p>
       <hr />
@@ -32,16 +31,15 @@ function ProfileSidebar(properties) {
   );
 }
 
-function ProfileRelationsBox(properties) {
+function ProfileRelationsBox(props) {
   return (
     <ProfileRelationsBoxWrapper>
       <h2 className="smallTitle">
-        {properties.title} ({properties.items.length})
+        {props.title} ({props.items.length})
       </h2>
-
       <ul>
-        {/*followers.map((item) => {
-          return(
+        {/* {followers.map((item) => {
+          return (
             <li key={item}>
               <a href={`https://github.com/${item}.png`}>
                 <img src={item.image} />
@@ -49,16 +47,15 @@ function ProfileRelationsBox(properties) {
               </a>
             </li>
           )
-        })*/}
+        })} */}
       </ul>
     </ProfileRelationsBoxWrapper>
   );
 }
 
-export default function Home() {
-  const user = "LarisseLima";
+export default function Home(props) {
+  const user = props.githubUser;
   const [communities, setcommunities] = React.useState([]);
-
   const friends = [
     "matheusnascgomes",
     "LarisseLima",
@@ -67,13 +64,18 @@ export default function Home() {
     "marianaseidel",
     "juunegreiros",
   ];
-
   const [followers, setfollowers] = React.useState([]);
+  React.useEffect(function () {
+    // GET
+    fetch("https://api.github.com/users/peas/followers")
+      .then(function (serverResponse) {
+        return serverResponse.json();
+      })
+      .then(function (fullAnswer) {
+        setfollowers(fullAnswer);
+      });
 
-  React.useEffect(() => {
-    fetch(`https://api.github.com/users/LarisseLima/followers`)
-      .then((serverResponse) => serverResponse.json())
-      .then((finalResponse) => setfollowers(finalResponse));
+    // API GraphQL
     fetch("https://graphql.datocms.com/", {
       method: "POST",
       headers: {
@@ -83,25 +85,26 @@ export default function Home() {
       },
       body: JSON.stringify({
         query: `query {
-          allCommunities {
-            id
-            title
-            imageUrl
-            creatorSlug
-          }
-        }`,
+        allCommunities {
+          id 
+          title
+          imageUrl
+          creatorSlug
+        }
+      }`,
       }),
     })
-      .then((resp) => resp.json())
-      .then((finalResponse) => {
-        const datoCommunities = finalResponse.data.allCommunities;
-        setComunidades(datoCommunities);
+      .then((response) => response.json()) // Pega o retorno do response.json() e já retorna
+      .then((fullAnswer) => {
+        const communitiesDato = fullAnswer.data.allCommunities;
+        console.log(communitiesDato);
+        setcommunities(communitiesDato);
       });
   }, []);
 
   return (
     <>
-      <AlurakutMenu githubUser={githubUser} />
+      <AlurakutMenu />
       <MainGrid>
         <div className="profileArea" style={{ gridArea: "profileArea" }}>
           <ProfileSidebar githubUser={user} />
@@ -114,29 +117,28 @@ export default function Home() {
           <Box>
             <h2 className="subTitle">O que você deseja fazer?</h2>
             <form
-              onSubmit={function handleNewcommunities(e) {
+              onSubmit={function handleCreateCommunity(e) {
                 e.preventDefault();
                 const dataForm = new FormData(e.target);
                 console.log("Campo: ", dataForm.get("title"));
                 console.log("Campo: ", dataForm.get("image"));
-
-                const communities = {
+                const community = {
                   title: dataForm.get("title"),
                   imageUrl: dataForm.get("image"),
-                  creatorSlug: githubUser,
+                  creatorSlug: user,
                 };
 
-                fetch("/api/communities", {
+                fetch("/api/comunidades", {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
                   },
-                  body: JSON.stringify(communities),
-                }).then(async (res) => {
-                  const dados = await res.json();
+                  body: JSON.stringify(community),
+                }).then(async (response) => {
+                  const data = await response.json();
                   console.log(data.recordCreated);
-                  const communities = data.recordCreated;
-                  const communitiesUpdate = [...communities, communities];
+                  const community = data.recordCreated;
+                  const communitiesUpdate = [...communities, community];
                   setcommunities(communitiesUpdate);
                 });
               }}
@@ -156,7 +158,7 @@ export default function Home() {
                   aria-label="Coloque uma URL para usarmos de capa"
                 />
               </div>
-              <button>Criar comunidades</button>
+              <button>Criar comunidade</button>
             </form>
           </Box>
         </div>
@@ -164,28 +166,13 @@ export default function Home() {
           className="profileRelationsArea"
           style={{ gridArea: "profileRelationsArea" }}
         >
-          <ProfileRelationsBoxWrapper>
-            <h2 className="smallTitle">Comunidades ({communities.length})</h2>
-            <ul>
-              {communities.map((item) => {
-                return (
-                  <li key={item.id}>
-                    <a href={`/users/${item.title}`}>
-                      <img src={item.image} />
-                      <span>{item.title}</span>
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          </ProfileRelationsBoxWrapper>
+          <ProfileRelationsBox title="followers" items={followers} />
           <ProfileRelationsBoxWrapper>
             <h2 className="smallTitle">
               Pessoas da comunidade ({friends.length})
             </h2>
-
             <ul>
-              {friends.map((item) => {
+              {friends.slice(0, 6).map((item) => {
                 return (
                   <li key={item}>
                     <a href={`/users/${item}`}>
@@ -197,8 +184,43 @@ export default function Home() {
               })}
             </ul>
           </ProfileRelationsBoxWrapper>
+          <ProfileRelationsBoxWrapper>
+            <h2 className="smallTitle">Comunidades ({communities.length})</h2>
+            <ul>
+              {communities.slice(0, 6).map((item) => {
+                return (
+                  <li key={item.id}>
+                    <a href={`/communities/${item.id}`}>
+                      <img src={item.imageUrl} />
+                      <span>{item.title}</span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </ProfileRelationsBoxWrapper>
         </div>
       </MainGrid>
     </>
   );
+}
+
+export async function getServerSideProps(ctx) {
+  const cookies = nookies.get(ctx);
+  const token = cookies.USER_TOKEN;
+  const decodedToken = jwt.decode(token);
+  const githubUser = decodedToken?.githubUser;
+  if (!githubUser) {
+    return {
+      redirect: {
+        destination: "/login",
+        permanent: false,
+      },
+    };
+  }
+  return {
+    props: {
+      githubUser,
+    },
+  };
 }

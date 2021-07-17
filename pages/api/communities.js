@@ -7,12 +7,9 @@ export default async function takerRequests(req, res) {
     const recordCreated = await client.items.create({
       itemType: "972624", // ID DO MODEL
       ...req.body,
-      //title: "Comunidade Teste",
-      //imageUrl: "https://github.com/LarisseLima.png",
-      //creatorSlug: "LarisseLima"
     });
     res.json({
-      data: "Dados",
+      data: "Data",
       recordCreated: recordCreated,
     });
     return;
