@@ -18,14 +18,12 @@ function ProfileSidebar(props) {
         style={{ borderRadius: "8px" }}
       />
       <hr />
-
       <p>
         <a className="boxLink" href={`https://github.com/${props.githubUser}`}>
           @{props.githubUser}
         </a>
       </p>
       <hr />
-
       <AlurakutProfileSidebarMenuDefault />
     </Box>
   );
@@ -58,11 +56,11 @@ export default function Home(props) {
   const [communities, setcommunities] = React.useState([]);
   const friends = [
     "matheusnascgomes",
-    "LarisseLima",
-    "anamlcl",
     "lohanyformiga",
+    "anamlcl",
     "marianaseidel",
-    "juunegreiros",
+    "hellenbarreto",
+    "zennsocial",
   ];
   const [followers, setfollowers] = React.useState([]);
   React.useEffect(function () {
@@ -112,7 +110,16 @@ export default function Home(props) {
         <div className="welcomeArea" style={{ gridArea: "welcomeArea" }}>
           <Box>
             <h1 className="title">Bem vindo(a)</h1>
-            <OrkutNostalgicIconSet />
+            <OrkutNostalgicIconSet
+              recados={89}
+              confiavel={3}
+              legal={3}
+              fas={7550}
+              sexy={3}
+              fotos={540}
+              mensagens={245}
+              videos={55}
+            />
           </Box>
           <Box>
             <h2 className="subTitle">O que você deseja fazer?</h2>
@@ -127,7 +134,6 @@ export default function Home(props) {
                   imageUrl: dataForm.get("image"),
                   creatorSlug: user,
                 };
-
                 fetch("/api/comunidades", {
                   method: "POST",
                   headers: {
@@ -166,7 +172,7 @@ export default function Home(props) {
           className="profileRelationsArea"
           style={{ gridArea: "profileRelationsArea" }}
         >
-          <ProfileRelationsBox title="followers" items={followers} />
+          <ProfileRelationsBox title="Seguidores" items={followers} />
           <ProfileRelationsBoxWrapper>
             <h2 className="smallTitle">
               Pessoas da comunidade ({friends.length})
