@@ -17,11 +17,11 @@ Recriando a maior rede social que já existiu, ORKUT agora vem em ALURAKUT.
 # 📱 Preview
 
 <p align="center">
-      <img src="assets/login.PNG" width="400" alt=" login">
+      <img src="assets/login.PNG" width="900" alt=" login">
    </p>
 
 <p align="center">
-      <img src="assets/screen.PNG" width="400" alt="tela">
+      <img src="assets/screen.PNG" width="900" alt="tela">
    </p>
 
 # :clipboard: Tecnologias Utilizadas
