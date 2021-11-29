@@ -56,7 +56,7 @@ Recriando a maior rede social que já existiu, ORKUT agora vem em ALURAKUT.
   yarn dev
 ```
 
-Vá para http://localhost:3000/login para ver o website.
+Vá para http://localhost:3000/login para ver o website funcionando.
 
 # :scroll: Licença
 
